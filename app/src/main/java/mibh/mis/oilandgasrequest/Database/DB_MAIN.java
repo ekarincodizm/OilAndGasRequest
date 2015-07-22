@@ -419,7 +419,6 @@ public class DB_MAIN extends SQLiteOpenHelper {
         String[] whereArgs = new String[]{filename};
         long l;
         l = db.update(this.Tb_Img, cv, where, whereArgs);
-
         return l;
   /*db.close();*/
     }

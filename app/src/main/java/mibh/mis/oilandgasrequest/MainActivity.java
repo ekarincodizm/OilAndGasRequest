@@ -173,7 +173,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     });
                     builderSingle.show();
-                } else new Loading(txtSearch.getText().toString()).execute();
+                } else {
+                    View focusView = this.getCurrentFocus();
+                    if (focusView != null) {
+                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    }
+                    new Loading(txtSearch.getText().toString()).execute();
+                }
                 break;
 
             case R.id.btnCamera:
@@ -198,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     });
                     builderSingle.show();
                 } else {
-                    intent = new Intent(MainActivity.this, Img_list.class);
+                    intent = new Intent(MainActivity.this, ImgList.class);
                     startActivity(intent);
                 }
                 break;
@@ -402,12 +409,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        prefManage.remove(prefManage.FUELID);
+        //prefManage.remove(prefManage.FUELID);
+        prefManage.setBoolValue(prefManage.SENTSTATION, true);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d("test onStart","");
-    }
+
 }

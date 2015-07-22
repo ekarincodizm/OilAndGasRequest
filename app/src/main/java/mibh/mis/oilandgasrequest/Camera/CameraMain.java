@@ -59,6 +59,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import mibh.mis.oilandgasrequest.AllService.CallWebService;
 import mibh.mis.oilandgasrequest.Data.PreferencesManager;
 import mibh.mis.oilandgasrequest.Database.IMG_OILANDGAS;
 import mibh.mis.oilandgasrequest.R;
@@ -83,7 +84,7 @@ public class CameraMain extends AppCompatActivity implements SurfaceHolder.Callb
     int camRear = Camera.CameraInfo.CAMERA_FACING_BACK;
     int camFront = Camera.CameraInfo.CAMERA_FACING_FRONT;
     int currentCam;
-    int rotat;
+    int rotat, firstCapRotate = 90;
     PreferencesManager prefManage;
     OrientationEventListener cOrientationEventListener;
 
@@ -399,6 +400,7 @@ public class CameraMain extends AppCompatActivity implements SurfaceHolder.Callb
                 if (currentCam == camRear) {
                     bmpRear = captureRear(data);
                     bmpRear = RotateBitmap(bmpRear, rotat, (float) 1);
+                    firstCapRotate = rotat;
                     System.gc();
                 } else if (currentCam == camFront) {
                     bmpFront = captureFront(data);
@@ -639,6 +641,10 @@ public class CameraMain extends AppCompatActivity implements SurfaceHolder.Callb
 
         int rw = mutableBitmap.getWidth();
         int rh = mutableBitmap.getHeight();
+        if (firstCapRotate == 0 || firstCapRotate == 180) {
+            rw = mutableBitmap.getHeight();
+            rh = mutableBitmap.getWidth();
+        }
         int w = mutableBitmap.getWidth();
         int h = mutableBitmap.getHeight();
 
@@ -666,20 +672,33 @@ public class CameraMain extends AppCompatActivity implements SurfaceHolder.Callb
         paint.setTextAlign(Paint.Align.RIGHT);
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
         paint.setColor(clr);
-        paint.setTextSize((int) (h * 0.04));
+        paint.setTextSize((int) (rh * 0.04));
         paint.setShadowLayer((float) 0.02, 1, 1, Color.BLACK);
         canvas.drawText(formattedDate, globalOffsetR, (int) (h * 0.06), paint);
 
-        paint.setTextSize((int) (h * 0.04));
+        paint.setTextSize((int) (rh * 0.04));
         canvas.drawText(formattedTime, globalOffsetR, (int) (h * 0.10), paint);
 
-        paint.setTextSize((int) (h * 0.03));
+        paint.setTextSize((int) (rh * 0.03));
         canvas.drawText(modeName, globalOffsetR, (int) (h * 0.15), paint);
 
         int x = globalOffsetR, y = (int) (h * 0.16);
+
+        int Start = 0, End = 0;
+        String stationName = prefManage.getValue(prefManage.STATIONNAME);
+        for (int i = 0; i <= stationName.length(); ++i) {
+            if (i % 22 == 0 || i == stationName.length()) {
+                canvas.drawText(stationName.substring(Start, i), x, y, paint);
+                if (i != stationName.length()) {
+                    y += -paint.ascent() + paint.descent();
+                }
+                Start = i;
+            }
+        }
         //y += -paint.ascent() + paint.descent();
+        y += (int) (h * 0.01);
         if (comment != null && !comment.equalsIgnoreCase("")) {
-            paint.setTextSize((int) (h * 0.03));
+            paint.setTextSize((int) (rh * 0.03));
             if (comment.contains("\n")) {
                 y += -paint.ascent() + paint.descent();
                 for (String line : comment.split("\n")) {
@@ -687,9 +706,10 @@ public class CameraMain extends AppCompatActivity implements SurfaceHolder.Callb
                     y += -paint.ascent() + paint.descent();
                 }
             } else {
-                int Start = 0, End = 0;
+                Start = 0;
+                End = 0;
                 for (int i = 0; i <= comment.length(); ++i) {
-                    if (i % 25 == 0 || i == comment.length()) {
+                    if (i % 22 == 0 || i == comment.length()) {
                         canvas.drawText(comment.substring(Start, i), x, y, paint);
                         y += -paint.ascent() + paint.descent();
                         Start = i;
@@ -699,30 +719,30 @@ public class CameraMain extends AppCompatActivity implements SurfaceHolder.Callb
         }
 
         paint.setTextAlign(Paint.Align.LEFT);
-        paint.setTextSize((int) (h * 0.03));
+        paint.setTextSize((int) (rh * 0.03));
         canvas.drawText(FUEL_DOCID, globalOffsetL, (int) (h * 0.05), paint);
 
-        paint.setTextSize((int) (h * 0.03));
+        paint.setTextSize((int) (rh * 0.03));
         canvas.drawText(prefManage.getValue(prefManage.NAME), ((int) (w * 0.02) + (int) (w * 0.22)), (int) (h * 0.80), paint);
 
-        paint.setTextSize((int) (h * 0.03));
+        paint.setTextSize((int) (rh * 0.03));
         canvas.drawText(prefManage.getValue(prefManage.EMP_ID), ((int) (w * 0.02) + (int) (w * 0.22)), (int) (h * 0.84), paint);
 
-        paint.setTextSize((int) (h * 0.03));
+        paint.setTextSize((int) (rh * 0.03));
         canvas.drawText(prefManage.getValue(prefManage.TEL), ((int) (w * 0.02) + (int) (w * 0.22)), (int) (h * 0.88), paint);
 
-        paint.setTextSize((int) (h * 0.025));
+        paint.setTextSize((int) (rh * 0.025));
         canvas.drawText(String.format("GPS: %.5f,%.5f", Double.parseDouble(prefManage.getValue(prefManage.latitude)), Double.parseDouble(prefManage.getValue(prefManage.longtitude))), ((int) (w * 0.02) + (int) (w * 0.22)), (int) (h * 0.935), paint);
 
-        paint.setTextSize((int) (h * 0.025));
+        paint.setTextSize((int) (rh * 0.025));
         canvas.drawText(prefManage.getValue(prefManage.locationname), ((int) (w * 0.02) + (int) (w * 0.22)), (int) (h * 0.97), paint);
 
         /* Paint edge */
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth((int) (rh * 0.02));
+        paint.setStrokeWidth((int) (h * 0.02));
         paint.setShadowLayer((float) 0.00, 0, 0, Color.BLACK);
         paint.setColor(Color.WHITE);
-        canvas.drawRect(0, 0, rw, rh, paint);
+        canvas.drawRect(0, 0, w, h, paint);
 
         System.gc();
         return mutableBitmap;
@@ -735,12 +755,29 @@ public class CameraMain extends AppCompatActivity implements SurfaceHolder.Callb
             if (prefManage.getValue(prefManage.locationname).length() > 200) {
                 locatName = prefManage.getValue(prefManage.locationname).substring(0, 198);
             } else locatName = prefManage.getValue(prefManage.locationname);
-            Log.d("test DoInbackGround", comment);
-            if (comment.length() >= 296) {
-                comment = comment.substring(0, 295) + "..";
-            }
-            //String result = new CallWebService().setState(FUEL_DOCID, ITEM, sp.getString("truckid", ""), String.format("%.5f,%.5f", Double.parseDouble(sp.getString("latitude", "0")), Double.parseDouble(sp.getString("longtitude", "0"))), loName, from, TYPE_IMG, sp.getString("empid", ""), sp.getString("firstname", "") + " " + sp.getString("lastname", ""), fileName, comment);
-            //Log.d("Result savestate", result);
+            Log.d("test DoInbackGround", "TEST");
+            /*if (comment.length() >= 296) {
+                comment = comment.substring(0, s295) + "..";
+            }*/
+
+            Log.d("savestate", prefManage.getValue(prefManage.FUELID) + " " +
+                    String.format("%.5f,%.5f", Double.parseDouble(prefManage.getValue(prefManage.latitude)), Double.parseDouble(prefManage.getValue(prefManage.longtitude))) + " " +
+                    locatName + " " +
+                    TYPE_IMG + " " +
+                    prefManage.getValue(prefManage.EMP_ID) + " " +
+                    prefManage.getValue(prefManage.NAME) + " " +
+                    fileName + " " +
+                    comment);
+            String result = new CallWebService().saveStateFuel(
+                    prefManage.getValue(prefManage.FUELID),
+                    String.format("%.5f,%.5f", Double.parseDouble(prefManage.getValue(prefManage.latitude)), Double.parseDouble(prefManage.getValue(prefManage.longtitude))),
+                    locatName,
+                    TYPE_IMG,
+                    prefManage.getValue(prefManage.EMP_ID),
+                    prefManage.getValue(prefManage.NAME),
+                    fileName,
+                    comment);
+            Log.d("Result savestate", result);
             return null;
         }
     }

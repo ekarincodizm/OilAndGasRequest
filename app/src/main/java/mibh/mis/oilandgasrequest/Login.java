@@ -1,10 +1,15 @@
 package mibh.mis.oilandgasrequest;
 
+import android.app.AlarmManager;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -16,11 +21,14 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import mibh.mis.oilandgasrequest.AllService.CallWebService;
+import mibh.mis.oilandgasrequest.AllService.UploadPicService;
+import mibh.mis.oilandgasrequest.AllService.Version;
 import mibh.mis.oilandgasrequest.Data.PreferencesManager;
 import mibh.mis.oilandgasrequest.Location.GLocation;
 
@@ -44,15 +52,32 @@ public class Login extends AppCompatActivity {
         PreferencesManager.initializeInstance(Login.this);
         prefManage = PreferencesManager.getInstance();
 
-        //startService(new Intent(this, GetLocation.class));
+        if (!isGPSEnable() || !isOnline()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
+            builder.setCancelable(true);
+            builder.setMessage("กรุณาเปิด Internet และ GPS ก่อนใช้งาน");
+            builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                    finish();
+                }
+            });
+            builder.show();
+        }
+
+        new Version(Login.this);
         new GLocation(this);
+        startService();
 
         loginLayout = findViewById(R.id.layoutLogin);
         btnLogin = (Button) findViewById(R.id.btnLogin);
         btnRegister = findViewById(R.id.btnRegister);
         empid_lgn = (EditText) findViewById(R.id.empid_lgn);
         idcard_lgn = (EditText) findViewById(R.id.idcard_lgn);
+        TextView txtVersion = (TextView) findViewById(R.id.txtVersion);
 
+        txtVersion.setText("V." + prefManage.getValue(prefManage.VERSION));
         empid_lgn.setText(prefManage.getValue(prefManage.EMP_ID));
         idcard_lgn.setText(prefManage.getValue(prefManage.ID_CARD));
 
@@ -96,7 +121,6 @@ public class Login extends AppCompatActivity {
                 return true;
             }
         });
-
     }
 
     public void validateLogin() {
@@ -148,36 +172,41 @@ public class Login extends AppCompatActivity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             pd.dismiss();
-            if (s.equals("False")) {
-                alert = new AlertDialog.Builder(Login.this);
-                alert.setMessage("เข้าสูระบบผิดพลาดกรุณาลองใหม่");
-                alert.setNegativeButton("ลองใหม่", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                });
-                alert.show();
-            } else if (s.equals("error")) {
-                alert = new AlertDialog.Builder(Login.this);
-                alert.setMessage("การเชื่อมต่อผิดพลาดกรุณาลองใหม่");
-                alert.setNegativeButton("ลองใหม่", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                });
-                alert.show();
-            } else {
-                convertData(s);
-                Intent intent = new Intent(Login.this, MainActivity.class);
-                startActivity(intent);
-                finish();
+            switch (s) {
+                case "False":
+                    alert = new AlertDialog.Builder(Login.this);
+                    alert.setMessage("เข้าสูระบบผิดพลาดกรุณาลองใหม่");
+                    alert.setNegativeButton("ลองใหม่", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+                    alert.show();
+                    break;
+                case "error":
+                    alert = new AlertDialog.Builder(Login.this);
+                    alert.setMessage("การเชื่อมต่อผิดพลาดกรุณาลองใหม่");
+                    alert.setNegativeButton("ลองใหม่", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+                    alert.show();
+                    break;
+                default:
+                    convertData(s);
+                    Intent intent = new Intent(Login.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                    break;
             }
         }
 
         @Override
         protected String doInBackground(String... s) {
+            //new Version(Login.this);
             Log.d("TEST result login", s[0] + " " + s[1]);
             String resultLogin = new CallWebService().checkLogin(s[0], s[1]);
             Log.d("TEST result login", resultLogin);
@@ -202,34 +231,38 @@ public class Login extends AppCompatActivity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             pd.dismiss();
-            if (s.equals("True")) {
-                dialog.dismiss();
-                saveShared(empid, idcard, name, tel);
-                Intent intent = new Intent(Login.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            } else if (s.equals("False")) {
-                alert = new AlertDialog.Builder(Login.this);
-                alert.setMessage("ระบบผิดพลาดกรุณาลองใหม่");
-                alert.setNegativeButton("ลองใหม่", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                        dialog.dismiss();
-                    }
-                });
-                alert.show();
-            } else if (s.equals("error")) {
-                alert = new AlertDialog.Builder(Login.this);
-                alert.setMessage("การเชื่อมต่อผิดพลาดกรุณาลองใหม่");
-                alert.setNegativeButton("ลองใหม่", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                        dialog.dismiss();
-                    }
-                });
-                alert.show();
+            switch (s) {
+                case "True":
+                    dialog.dismiss();
+                    saveShared(empid, idcard, name, tel);
+                    Intent intent = new Intent(Login.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                    break;
+                case "False":
+                    alert = new AlertDialog.Builder(Login.this);
+                    alert.setMessage("ระบบผิดพลาดกรุณาลองใหม่");
+                    alert.setNegativeButton("ลองใหม่", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                            dialog.dismiss();
+                        }
+                    });
+                    alert.show();
+                    break;
+                case "error":
+                    alert = new AlertDialog.Builder(Login.this);
+                    alert.setMessage("การเชื่อมต่อผิดพลาดกรุณาลองใหม่");
+                    alert.setNegativeButton("ลองใหม่", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                            dialog.dismiss();
+                        }
+                    });
+                    alert.show();
+                    break;
             }
         }
 
@@ -319,6 +352,28 @@ public class Login extends AppCompatActivity {
         prefManage.setValue(prefManage.ID_CARD, idcard);
         prefManage.setValue(prefManage.NAME, name);
         prefManage.setValue(prefManage.TEL, tel);
+    }
+
+    private void startService() {
+        Log.i("SERVICE", "Service created...");
+        Intent startServiceIntent = new Intent(Login.this, UploadPicService.class);
+        PendingIntent startWebServicePendingIntent = PendingIntent.getService(Login.this, 0, startServiceIntent, 0);
+        AlarmManager alarmManager = (AlarmManager) Login.this.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 60 * 1000 * 30, startWebServicePendingIntent);
+    }
+
+    public boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Login.this.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+    public boolean isGPSEnable() {
+        LocationManager manager = (LocationManager) getSystemService(Login.this.LOCATION_SERVICE);
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            return false;
+        }
+        return true;
     }
 
 }

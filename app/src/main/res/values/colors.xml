@@ -21,6 +21,9 @@
     <color name="divider">#B6B6B6</color>
 
     <color name="icn_color">#20457C</color>
+    <color name="light_sky_blue">#87cefa</color>
+    <color name="mint">#AAF0D1</color>
+    <color name="powder_blue">#B0E0E6</color>
 
     <color name="fbutton_color_turquoise">#1abc9c</color>
     <color name="fbutton_color_green_sea">#16a085</color>

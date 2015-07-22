@@ -96,7 +96,6 @@ public class GridPic extends AppCompatActivity {
             holder.imageview.setId(position);
             holder.checkbox.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    // TODO Auto-generated method stub
                     CheckBox cb = (CheckBox) v;
                     int id = cb.getId();
                     if (mCheckStates.get(id, false)) {
@@ -115,7 +114,6 @@ public class GridPic extends AppCompatActivity {
 
             holder.imageview.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    // TODO Auto-generated method stub
                     int id = v.getId();
                     File output = new File(imagesFolder, Arr.get(id).Filename);
                     Uri uri2 = Uri.fromFile(output);

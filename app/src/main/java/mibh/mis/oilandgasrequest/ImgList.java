@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -11,6 +12,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +22,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import mibh.mis.oilandgasrequest.AllService.CallWebService;
 import mibh.mis.oilandgasrequest.Camera.CameraMain;
 import mibh.mis.oilandgasrequest.Data.PreferencesManager;
 import mibh.mis.oilandgasrequest.Database.IMG_OILANDGAS;
@@ -27,7 +30,7 @@ import mibh.mis.oilandgasrequest.Database.IMG_OILANDGAS;
 /**
  * Created by ponlakiss on 07/16/2015.
  */
-public class Img_list extends AppCompatActivity {
+public class ImgList extends AppCompatActivity {
 
     RecyclerView recyclerView;
     Adapter adapter;
@@ -35,7 +38,7 @@ public class Img_list extends AppCompatActivity {
     String[] arrName;
     static SparseBooleanArray mCheckStates;
     ArrayList<IMG_OILANDGAS.Image_tms> cursor;
-    IMG_OILANDGAS ImgTms;
+    IMG_OILANDGAS ImgMain;
     PreferencesManager prefManage;
 
     @Override
@@ -45,9 +48,9 @@ public class Img_list extends AppCompatActivity {
         listItem = (CardView) findViewById(R.id.cardimage_item);
         recyclerView = (RecyclerView) findViewById(R.id.image_recycleview);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(Img_list.this));
+        recyclerView.setLayoutManager(new LinearLayoutManager(ImgList.this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        ImgTms = new IMG_OILANDGAS(Img_list.this);
+        ImgMain = new IMG_OILANDGAS(ImgList.this);
 
         prefManage = PreferencesManager.getInstance();
 
@@ -56,15 +59,15 @@ public class Img_list extends AppCompatActivity {
         arrName = getResources().getStringArray(R.array.img_list);
         mCheckStates = new SparseBooleanArray(arrName.length);
 
-        cursor = ImgTms.Img_GetImageByGroupType(prefManage.getValue(prefManage.FUELID), ImgTms.IMG_FUEL);
+        cursor = ImgMain.Img_GetImageByGroupType(prefManage.getValue(prefManage.FUELID), ImgMain.IMG_FUEL);
         for (int i = 0; i < cursor.size(); i++) {
             int x = Integer.parseInt(cursor.get(i).Type_img);
-            mCheckStates.put(x - 10, true);
+            mCheckStates.put(x - 20, true);
         }
-        ImgTms.close();
+        ImgMain.close();
 
         if (adapter == null) {
-            adapter = new Adapter(Img_list.this);
+            adapter = new Adapter(ImgList.this);
             recyclerView.setAdapter(adapter);
         } else {
             adapter.notifyDataSetChanged();
@@ -83,7 +86,7 @@ public class Img_list extends AppCompatActivity {
                 public void onClick(View v) {
                     Intent intent = new Intent();
                     setResult(RESULT_OK, intent);
-                    Img_list.this.finish();
+                    ImgList.this.finish();
                 }
             });
         }
@@ -111,9 +114,9 @@ public class Img_list extends AppCompatActivity {
             versionViewHolder.imageMore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(Img_list.this, GridPic.class);
+                    Intent intent = new Intent(ImgList.this, GridPic.class);
                     intent.putExtra("FUEL_DOCID", prefManage.getValue(prefManage.FUELID));
-                    intent.putExtra("Type_Img", String.valueOf(10 + position));
+                    intent.putExtra("Type_Img", String.valueOf(20 + position));
                     startActivity(intent);
                 }
             });
@@ -121,7 +124,7 @@ public class Img_list extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     if (prefManage.getValue(prefManage.latitude).equals("") || prefManage.getValue(prefManage.longtitude).equals("")) {
-                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(Img_list.this);
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ImgList.this);
                         alertDialogBuilder.setMessage("กรุณารอข้อมูล GPS สักครู่");
                         alertDialogBuilder.setNegativeButton("ตกลง",
                                 new DialogInterface.OnClickListener() {
@@ -133,11 +136,14 @@ public class Img_list extends AppCompatActivity {
                         AlertDialog alertDialog = alertDialogBuilder.create();
                         alertDialog.show();
                     } else {
-                        Intent intent = new Intent(Img_list.this, CameraMain.class);
+                        if (prefManage.getBoolValue(prefManage.SENTSTATION)) {
+                            new SentStation().execute();
+                        }
+                        Intent intent = new Intent(ImgList.this, CameraMain.class);
                         intent.putExtra("FUEL_DOCID", prefManage.getValue(prefManage.FUELID));
-                        intent.putExtra("MODE", ImgTms.Doc_name(String.valueOf(10 + position)));
-                        intent.putExtra("From", ImgTms.IMG_FUEL);
-                        intent.putExtra("Type_Img", String.valueOf(10 + position));
+                        intent.putExtra("MODE", ImgMain.Doc_name(String.valueOf(20 + position)));
+                        intent.putExtra("From", ImgMain.IMG_FUEL);
+                        intent.putExtra("Type_Img", String.valueOf(20 + position));
                         startActivityForResult(intent, position);
                     }
                 }
@@ -173,6 +179,24 @@ public class Img_list extends AppCompatActivity {
             }
         }
 
+        private class SentStation extends AsyncTask<String, String, String> {
+            @Override
+            protected String doInBackground(String... strings) {
+                return new CallWebService().getStationName(String.format("%.5f,%.5f", Double.parseDouble(prefManage.getValue(prefManage.latitude)), Double.parseDouble(prefManage.getValue(prefManage.longtitude))));
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                Log.d("TEST SENTStation", s);
+                if (!s.equals("error")) {
+                    prefManage.setValue(prefManage.STATIONNAME, s);
+                    prefManage.setBoolValue(prefManage.SENTSTATION, false);
+                }
+
+            }
+        }
+
     }
 
     @Override
@@ -183,4 +207,5 @@ public class Img_list extends AppCompatActivity {
             adapter.notifyDataSetChanged();
         }
     }
+
 }

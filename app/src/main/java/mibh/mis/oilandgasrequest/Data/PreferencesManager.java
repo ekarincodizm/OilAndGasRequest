@@ -18,17 +18,16 @@ public class PreferencesManager {
     public static final String ID_CARD = "ID_CARD";
     public static final String NAME = "NAME";
     public static final String TEL = "TEL";
-
     public static final String FUELID = "FUELID";
-
     public static final String latitude = "latitude";
     public static final String longtitude = "longtitude";
     public static final String locationname = "locationname";
-
     public static final String SOUND = "SOUND";
     public static final String VIBRATE = "VIBRATE";
-
     public static final String COMMENT = "COMMENT";
+    public static final String VERSION = "VERSION";
+    public static final String SENTSTATION = "SENTSTATION";
+    public static final String STATIONNAME = "STATIONNAME";
 
     private PreferencesManager(Context context) {
         mPref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -72,4 +71,5 @@ public class PreferencesManager {
     public boolean clear() {
         return mPref.edit().clear().commit();
     }
+
 }

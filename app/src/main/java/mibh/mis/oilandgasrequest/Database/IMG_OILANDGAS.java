@@ -16,10 +16,10 @@ public class IMG_OILANDGAS {
 
     public static final String IMG_FUEL = "FUEL";
 
-    public static final String IMG_LOCATION = "10";
-    public static final String IMG_DOC = "11";
-    public static final String IMG_CAR = "12";
-    public static final String IMG_OTHER = "13";
+    public static final String IMG_LOCATION = "20";
+    public static final String IMG_DOC = "21";
+    public static final String IMG_CAR = "22";
+    public static final String IMG_OTHER = "23";
 
     public static final String ACTIVE = "ACTIVE";
     public static final String INACTIVE = "INACTIVE";
