@@ -55,7 +55,6 @@ public class Version {
 
     public String GetVersionName() {
         String app_ver = "Unknown version";
-
         try {
             //Get version
             app_ver = act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionName;
@@ -111,10 +110,10 @@ public class Version {
                             dialog.dismiss();
                         }
                     });
-            if (!appVer.equals(newVersion)) {
+            if (!appVer.equals(newVersion) && newVersion != null) {
                 builderSingle.show();
             } else {
-                /*Intent mainIntent = new Intent(act, Login.class);
+                /*Intent mainIntent = new Intent(act, MainActivity.class);
                 act.startActivity(mainIntent);
                 act.finish();*/
             }
@@ -137,12 +136,23 @@ public class Version {
             super.onPostExecute(s);
             Log.d("TEST VERSION", s);
             try {
-                appName = GetApplicationName();
-                appVer = GetVersionName();
-                prefManage.setValue(prefManage.VERSION, appVer);
-                convertVersion(s);
+                if (s.equalsIgnoreCase("error") || s.equalsIgnoreCase("")) {
+                    AlertDialog.Builder builderSingle = new AlertDialog.Builder(act);
+                    builderSingle.setMessage("ไม่สามารถตนวจสอบเวอชันได้");
+                    builderSingle.setPositiveButton("ตกลง",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    act.finish();
+                                }
+                            });
+                } else {
+                    appName = GetApplicationName();
+                    appVer = GetVersionName();
+                    prefManage.setValue(prefManage.VERSION, appVer);
+                    convertVersion(s);
+                }
             } catch (Exception e) {
-                e.printStackTrace();
                 AlertDialog.Builder builderSingle = new AlertDialog.Builder(act);
                 builderSingle.setMessage("ไม่สามารถตนวจสอบเวอชันได้");
                 builderSingle.setPositiveButton("ตกลง",

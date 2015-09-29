@@ -17,9 +17,13 @@ public class IMG_OILANDGAS {
     public static final String IMG_FUEL = "FUEL";
 
     public static final String IMG_LOCATION = "20";
-    public static final String IMG_DOC = "21";
-    public static final String IMG_CAR = "22";
-    public static final String IMG_OTHER = "23";
+    public static final String IMG_DOC_FUEL = "21";
+    public static final String IMG_DOC_RECEIPT = "22";
+    public static final String IMG_CAR = "23";
+    /*public static final String IMG_CAR_LICENSE = "24";*/
+    public static final String IMG_PRICE = "24";
+    public static final String IMG_FUELING = "25";
+    public static final String IMG_OTHER = "26";
 
     public static final String ACTIVE = "ACTIVE";
     public static final String INACTIVE = "INACTIVE";
@@ -31,11 +35,23 @@ public class IMG_OILANDGAS {
         if (img_type.equalsIgnoreCase(this.IMG_LOCATION)) {
             Dname = "สถานี";
         }
-        if (img_type.equalsIgnoreCase(this.IMG_DOC)) {
-            Dname = "เอกสาร";
+        if (img_type.equalsIgnoreCase(this.IMG_DOC_FUEL)) {
+            Dname = "ใบเบิกเชื้อเพลิง";
+        }
+        if (img_type.equalsIgnoreCase(this.IMG_DOC_RECEIPT)) {
+            Dname = "ใบเสร็จ";
         }
         if (img_type.equalsIgnoreCase(this.IMG_CAR)) {
             Dname = "รถ";
+        }
+        /*if (img_type.equalsIgnoreCase(this.IMG_CAR_LICENSE)) {
+            Dname = "ป้ายทะเบียน";
+        }*/
+        if (img_type.equalsIgnoreCase(this.IMG_PRICE)) {
+            Dname = "ยอดการเติมที่หน้าตู้เติม";
+        }
+        if (img_type.equalsIgnoreCase(this.IMG_FUELING)) {
+            Dname = "รูปขณะเติม";
         }
         if (img_type.equalsIgnoreCase(this.IMG_OTHER)) {
             Dname = "อื่นๆ";

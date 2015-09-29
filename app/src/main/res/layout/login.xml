@@ -11,7 +11,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="mibh.mis.tms.Login"
-    android:background="@color/powder_blue">
+    android:background="#AEE4F7">
 
     <!-- Login progress -->
 
@@ -24,7 +24,7 @@
         android:layout_centerHorizontal="true"
         android:layout_gravity="center_horizontal"
         android:adjustViewBounds="true"
-        android:src="@drawable/icon3"
+        android:src="@drawable/ico1"
         android:layout_marginBottom="16dp" />
 
     <LinearLayout

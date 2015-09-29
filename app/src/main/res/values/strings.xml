@@ -6,8 +6,12 @@
 
     <string-array name="img_list">
         <item>สถานี</item>
-        <item>เอกสาร</item>
+        <item>ใบเบิกเชื้อเพลิง</item>
+        <item>ใบเสร็จ</item>
         <item>รถ</item>
+        <!--<item>ป้ายทะเบียน</item>-->
+        <item>ยอดการเติมที่หน้าตู้เติม</item>
+        <item>รูปขณะเติม</item>
         <item>อื่นๆ</item>
     </string-array>
 </resources>

@@ -36,6 +36,7 @@ public class CallWebService {
             polydata.put("USER_ID", userid);
             polydata.put("USERSCAN", userscan);
             polydata.put("LATLNG", latlng);
+            Log.d("TEST sent result", polydata.toString());
             request.addProperty("JsonOb_FuelData", polydata.toString());
             SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
             envelope.dotNet = true;
@@ -127,7 +128,7 @@ public class CallWebService {
         } catch (Exception e) {
             Log.d("Error version", e.toString());
         }
-        return "";
+        return "error";
     }
 
     public String savePic(String json_photo, String json_Img_ct) {
@@ -155,7 +156,7 @@ public class CallWebService {
         }
     }
 
-    public String getStationName(String latlng){
+    public String getStationName(String latlng) {
         try {
             METHOD_NAME = "GetStationName";
             soap_property = new SOAPWebserviceProperty();
@@ -178,7 +179,7 @@ public class CallWebService {
         }
     }
 
-    public String saveStateFuel(String FUEL_ID,String LAT_LNG, String LOCATION_NAME,String TYPE_IMG,String EMP_ID,String EMP_NAME,String FILE_NAME,String COMMENT_PHOTO){
+    public String saveStateFuel(String FUEL_ID, String LAT_LNG, String LOCATION_NAME, String TYPE_IMG, String EMP_ID, String EMP_NAME, String FILE_NAME, String COMMENT_PHOTO) {
         try {
             METHOD_NAME = "Save_StateFuel";
             soap_property = new SOAPWebserviceProperty();

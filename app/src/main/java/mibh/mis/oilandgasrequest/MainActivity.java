@@ -7,7 +7,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Color;
+import android.location.LocationManager;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -173,7 +176,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     });
                     builderSingle.show();
-                } else {
+                }else if(txtSearch.getText().toString().trim().equals("")){
+                    builderSingle = new AlertDialog.Builder(MainActivity.this);
+                    builderSingle.setMessage("กรุณาใส่เลขที่ใบเบิกเชื้อเพลิงหรือทำการแสกนใบเบิกเชื้อเพลิงก่อน");
+                    builderSingle.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+                    builderSingle.show();
+                }
+                else {
                     View focusView = this.getCurrentFocus();
                     if (focusView != null) {
                         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -250,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             txtSearch.setText(contents);
             Log.d("", requestCode + " " + resultCode + " " + contents + " " + format);
             txtResult.setText("");
-            new Loading(txtSearch.getText().toString()).execute();
+            new Loading(txtSearch.getText().toString().trim()).execute();
         }
     }
 
@@ -413,5 +427,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         prefManage.setBoolValue(prefManage.SENTSTATION, true);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!isGPSEnable() || !isOnline()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setCancelable(false);
+            builder.setMessage("กรุณาเปิด Internet และ GPS ก่อนใช้งาน");
+            builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                    finish();
+                }
+            });
+            builder.show();
+        }
+    }
 
+    public boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(MainActivity.this.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+    public boolean isGPSEnable() {
+        LocationManager manager = (LocationManager) getSystemService(MainActivity.this.LOCATION_SERVICE);
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            return false;
+        }
+        return true;
+    }
 }

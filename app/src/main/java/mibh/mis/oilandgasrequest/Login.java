@@ -52,20 +52,6 @@ public class Login extends AppCompatActivity {
         PreferencesManager.initializeInstance(Login.this);
         prefManage = PreferencesManager.getInstance();
 
-        if (!isGPSEnable() || !isOnline()) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
-            builder.setCancelable(true);
-            builder.setMessage("กรุณาเปิด Internet และ GPS ก่อนใช้งาน");
-            builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.dismiss();
-                    finish();
-                }
-            });
-            builder.show();
-        }
-
         new Version(Login.this);
         new GLocation(this);
         startService();
@@ -123,13 +109,31 @@ public class Login extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!isGPSEnable() || !isOnline()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
+            builder.setCancelable(false);
+            builder.setMessage("กรุณาเปิด Internet และ GPS ก่อนใช้งาน");
+            builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                    finish();
+                }
+            });
+            builder.show();
+        }
+    }
+
     public void validateLogin() {
 
         empid_lgn.setError(null);
         idcard_lgn.setError(null);
 
-        String emp = empid_lgn.getText().toString();
-        String idcard = idcard_lgn.getText().toString();
+        String emp = empid_lgn.getText().toString().trim();
+        String idcard = idcard_lgn.getText().toString().trim();
 
         boolean cancel = false;
 
@@ -175,7 +179,7 @@ public class Login extends AppCompatActivity {
             switch (s) {
                 case "False":
                     alert = new AlertDialog.Builder(Login.this);
-                    alert.setMessage("เข้าสูระบบผิดพลาดกรุณาลองใหม่");
+                    alert.setMessage("เข้าสู่ระบบผิดพลาดกรุณาลองใหม่");
                     alert.setNegativeButton("ลองใหม่", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -287,11 +291,11 @@ public class Login extends AppCompatActivity {
         lname.setError(null);
         tel.setError(null);
 
-        String Empid = emp_id.getText().toString();
-        String Idcard = id_card.getText().toString();
-        String Fname = fname.getText().toString();
-        String Lname = lname.getText().toString();
-        String Tel = tel.getText().toString();
+        String Empid = emp_id.getText().toString().trim();
+        String Idcard = id_card.getText().toString().trim();
+        String Fname = fname.getText().toString().trim();
+        String Lname = lname.getText().toString().trim();
+        String Tel = tel.getText().toString().trim();
 
         boolean cancel = false;
 
@@ -348,10 +352,10 @@ public class Login extends AppCompatActivity {
     }
 
     private void saveShared(String empid, String idcard, String name, String tel) {
-        prefManage.setValue(prefManage.EMP_ID, empid);
-        prefManage.setValue(prefManage.ID_CARD, idcard);
-        prefManage.setValue(prefManage.NAME, name);
-        prefManage.setValue(prefManage.TEL, tel);
+        prefManage.setValue(prefManage.EMP_ID, empid.trim());
+        prefManage.setValue(prefManage.ID_CARD, idcard.trim());
+        prefManage.setValue(prefManage.NAME, name.trim());
+        prefManage.setValue(prefManage.TEL, tel.trim());
     }
 
     private void startService() {
