@@ -309,7 +309,7 @@ public class CameraMain extends AppCompatActivity implements SurfaceHolder.Callb
     }
 
     public void onSensorChanged(SensorEvent event) {
-        if (Math.abs(event.values[0] - motionX) > 1
+        /*if (Math.abs(event.values[0] - motionX) > 1
                 || Math.abs(event.values[1] - motionY) > 1
                 || Math.abs(event.values[2] - motionZ) > 1) {
             Log.d("Camera System", "Refocus");
@@ -321,7 +321,7 @@ public class CameraMain extends AppCompatActivity implements SurfaceHolder.Callb
             motionX = event.values[0];
             motionY = event.values[1];
             motionZ = event.values[2];
-        }
+        }*/
     }
 
     public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
